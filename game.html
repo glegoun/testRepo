@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10대 유행어 퀴즈 게임 🔥</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 300% 300%;
+            animation: gradientShift 10s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .start-screen {
+            display: block;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .start-button, .next-button, .restart-button {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .start-button:hover, .next-button:hover, .restart-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 10px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .question-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .question {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .hint {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .option.correct {
+            background: rgba(76, 175, 80, 0.8);
+            border-color: #4CAF50;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .option.wrong {
+            background: rgba(244, 67, 54, 0.8);
+            border-color: #f44336;
+            animation: wrongShake 0.6s ease;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            color: white;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: scoreGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes scoreGlow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+            to { text-shadow: 2px 2px 20px rgba(255, 255, 255, 0.5); }
+        }
+
+        .score-message {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.7;
+        }
+
+        .emoji1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .emoji2 { top: 20%; right: 10%; animation-delay: 1s; }
+        .emoji3 { bottom: 20%; left: 15%; animation-delay: 2s; }
+        .emoji4 { bottom: 10%; right: 20%; animation-delay: 1.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(5deg); }
+            66% { transform: translateY(10px) rotate(-5deg); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="floating-emoji emoji1">🔥</div>
+        <div class="floating-emoji emoji2">💯</div>
+        <div class="floating-emoji emoji3">✨</div>
+        <div class="floating-emoji emoji4">🚀</div>
+        
+        <!-- 시작 화면 -->
+        <div class="start-screen" id="startScreen">
+            <h1 class="title">10대 유행어 퀴즈 🔥</h1>
+            <p class="subtitle">요즘 10대들 사이에서 핫한 유행어들을 얼마나 알고 있을까요?</p>
+            <button class="start-button" onclick="startGame()">게임 시작하기 ✨</button>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div class="game-screen" id="gameScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="score-display">
+                점수: <span id="currentScore">0</span> / <span id="totalQuestions">10</span>
+            </div>
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <div class="hint" id="hint"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <button class="next-button" id="nextButton" onclick="nextQuestion()" style="display: none;">다음 문제 💫</button>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div class="result-screen" id="resultScreen">
+            <h2 class="title">게임 끝! 🎉</h2>
+            <div class="final-score" id="finalScore"></div>
+            <div class="score-message" id="scoreMessage"></div>
+            <button class="restart-button" onclick="restartGame()">다시 도전하기 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "\"그게 뭔데?\"라는 의미로 사용되는 요즘 유행어는?",
+                hint: "모르는 것을 물어볼 때 많이 써요",
+                options: ["그게머임?", "그게뭔고?", "그게먼데?", "그게멀까?"],
+                correct: 0
+            },
+            {
+                question: "매우 좋다, 최고다는 의미의 유행어는?",
+                hint: "숫자와 관련이 있어요",
+                options: ["개쩔어", "ㅇㅈ", "레전드", "💯"],
+                correct: 3
+            },
+            {
+                question: "\"진짜 대박이다\"는 의미로 쓰이는 요즘 표현은?",
+                hint: "불과 관련된 이모지를 함께 써요",
+                options: ["미쳤다", "개쩐다", "빨간맛", "불타오르네"],
+                correct: 1
+            },
+            {
+                question: "\"너무 웃겨서 죽겠다\"는 의미의 줄임말은?",
+                hint: "ㅋㅋㅋ의 진화형이에요",
+                options: ["ㅋㅋㄹㅃㅃ", "웃겨죽어", "개웃김", "ㅋㅋ루삥뽕"],
+                correct: 0
+            },
+            {
+                question: "\"팩트\"를 줄여서 쓰는 표현은?",
+                hint: "영어 Fact를 줄인 거예요",
+                options: ["ㅍㅌ", "팩츠", "사실임", "ㄹㅇ"],
+                correct: 1
+            },
+            {
+                question: "\"그렇다\"는 의미의 줄임말은?",
+                hint: "동의할 때 많이 써요",
+                options: ["ㅇㅇ", "ㅇㅈ", "ㄱㄷ", "ㄱㅊ"],
+                correct: 2
+            },
+            {
+                question: "\"실화냐?\"와 비슷한 의미의 유행어는?",
+                hint: "놀랍거나 믿기지 않을 때 써요",
+                options: ["진짜임?", "레알?", "리얼??", "마지?"],
+                correct: 3
+            },
+            {
+                question: "\"나 지금 멘붕이야\"에서 멘붕의 뜻은?",
+                hint: "정신적으로 무너졌을 때 써요",
+                options: ["멘탈붕괴", "멘트붕괴", "멘션붕괴", "멘델붕괴"],
+                correct: 0
+            },
+            {
+                question: "\"좋아요\"를 표현하는 요즘 방식은?",
+                hint: "하트와 관련이 있어요",
+                options: ["굿굿", "좋아용", "하트하트", "♥♥"],
+                correct: 2
+            },
+            {
+                question: "\"알겠어\"를 줄여서 쓰는 표현은?",
+                hint: "ㅇ으로 시작해요",
+                options: ["ㅇㅋ", "ㅇㄱ", "ㅇㄷ", "ㅇㅌ"],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let gameStarted = false;
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            gameStarted = true;
+            currentQuestion = 0;
+            score = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = quizData[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            document.getElementById('hint').textContent = `💡 힌트: ${question.hint}`;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('button');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            updateProgress();
+            document.getElementById('nextButton').style.display = 'none';
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('totalQuestions').textContent = quizData.length;
+        }
+
+        function selectOption(selectedIndex) {
+            const question = quizData[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                option.onclick = null; // 클릭 비활성화
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('wrong');
+                }
+            });
+
+            if (selectedIndex === question.correct) {
+                score++;
+                // 정답 효과음 대신 시각적 피드백
+                setTimeout(() => {
+                    document.querySelector('.question-container').style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        document.querySelector('.question-container').style.transform = 'scale(1)';
+                    }, 200);
+                }, 100);
+            }
+
+            document.getElementById('nextButton').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResult() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            document.getElementById('finalScore').textContent = `${score}/${quizData.length}`;
+            
+            let message = '';
+            const percentage = (score / quizData.length) * 100;
+            
+            if (percentage >= 90) {
+                message = "와! 진짜 완전 찐텐 🔥 10대 유행어 마스터네요!";
+            } else if (percentage >= 70) {
+                message = "오! 꽤 아시는군요 👍 요즘 애들과 소통 가능!";
+            } else if (percentage >= 50) {
+                message = "그럭저럭이네요 😅 조금만 더 공부하면 완벽!";
+            } else {
+                message = "아직 멀었어요 😢 10대들과 대화하기 힘들겠는걸?";
+            }
+            
+            document.getElementById('scoreMessage').textContent = message;
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        // 키보드 이벤트 추가
+        document.addEventListener('keydown', function(e) {
+            if (gameStarted && document.getElementById('gameScreen').style.display === 'block') {
+                if (e.key >= '1' && e.key <= '4') {
+                    const index = parseInt(e.key) - 1;
+                    const options = document.querySelectorAll('.option');
+                    if (options[index] && options[index].onclick) {
+                        options[index].click();
+                    }
+                } else if (e.key === ' ' || e.key === 'Enter') {
+                    const nextBtn = document.getElementById('nextButton');
+                    if (nextBtn.style.display !== 'none') {
+                        nextBtn.click();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
